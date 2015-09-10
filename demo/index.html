@@ -1,0 +1,201 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<html>
+<head>
+  <title>carbo-form demo</title>
+
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script>
+    window.Polymer = window.Polymer || {};
+    window.Polymer.dom = 'shadow';
+  </script>
+  <link rel="import" href="../../paper-input/paper-input.html">
+  <link rel="import" href="../../paper-input/paper-input-container.html">
+  <link rel="import" href="../../paper-button/paper-button.html">
+  <link rel="import" href="../../paper-toast/paper-toast.html">
+  <link rel="import" href="../../paper-dialog/paper-dialog.html">
+  <link rel="import" href="../../iron-input/iron-input.html">
+  <link rel="import" href="../../iron-form/iron-form.html">
+
+  <link rel="import" href="../carbo-form.html">
+
+</head>
+<style>
+  
+  #invalid-message {
+    background-color: darkred;
+  }
+
+  #success-message {
+    background-color: darkgreen;
+  }
+
+  #error-message {
+    background-color: red;
+  }
+
+  #invalid-message, #success-message, #error-message {
+    position: fixed;
+    opacity: 0;
+    transition: all ease 0.4s;
+
+    top: 0px;
+    left: 0px;
+  }
+
+  carbo-form[state="invalid"] #invalid-message,
+  carbo-form[state="success"] #success-message,
+  carbo-form[state="error"] #error-message {
+    opacity: 1;
+    color: white;
+
+    top: 50px;
+    bottom: 50px;
+    left: 50px;
+    right: 50px;
+  }
+
+</style>
+<body>
+  <h4>carbo-form specific demo</h4>
+  <carbo-form id="test">
+
+    <!-- the form -->
+    <form is="iron-form" action="/demo/data.json" method="get">
+      <paper-input 
+
+        value="valor requerido"
+
+        name="test0" 
+        label="Campo 1 (required)" 
+        required
+      ></paper-input>
+
+      <paper-input 
+
+        value="req"
+
+        name="test1" 
+        label="Campo 2 (maxlength 3)" 
+        maxlength="3"
+      ></paper-input>
+
+      <paper-input 
+
+        value="123"
+
+        name="test2" 
+        label="Campo 2 (only numbers)" 
+        pattern="[0-9]*"
+        error-message="Only numbers please"
+        auto-validate
+        required
+      ></paper-input>
+
+
+      <paper-input 
+        id="zip" 
+        label="ZIP Code:" 
+        pattern="\d{5}([-]\d{4})?"
+        error-message="This is not a valid ZIP Code" 
+        auto-validate
+      ></paper-input>
+
+      <paper-input-container>
+        <label>paper-input-container (required)</label>
+        <input name="test3" pattern="[abc]*" value="abc" required>
+      </paper-input-container>
+
+      <input name="test3" value="xyz" required>
+    </form>
+    <!-- the form -->
+
+    <!-- form controls -->
+    <div form-control>
+      <paper-button
+        raised 
+        action="submit"
+      >Enviar no clique</paper-button>
+      <paper-button
+        raised 
+        action="submit"
+      >outro botão</paper-button>
+    </div>
+    <!-- form controls -->
+
+    <!-- when invalid -->
+    <div state="invalid">
+      <div id="invalid-message">
+        estado de invalid
+        <div action="click:reset">deu errado :(</div>
+      </div>
+
+      <paper-toast text="invalido" show="show">
+        <paper-button raised action="submit">reenviar no clique</paper-button>
+      </paper-toast>
+    </div>
+    <!-- when invalid -->
+
+    <!-- when loading -->
+    <div state="loading">
+      <paper-toast text="carregando" show="show">
+      </paper-toast>
+    </div>
+
+    <!-- when error -->
+    <div state="error">
+      <div action="mouseout:reset" id="error-message">
+        Erro no form após submissão de dados
+      </div>
+      <paper-dialog show="open">
+        <h2>Houve um erro</h2>
+        <paper-dialog-scrollable>
+          Lorem ipsum...
+        </paper-dialog-scrollable>
+        <div class="buttons">
+          <paper-button dialog-dismiss>Desistir</paper-button>
+          <paper-button action="mouseout:submit">Retry</paper-button>
+        </div>
+      </paper-dialog>
+    </div>
+    <!-- when error -->
+
+    <!-- when success -->
+    <div state="success">
+      <div id="success-message">
+        estado de sucesso
+        <h2 action="reset">top</h2>
+      </div>
+
+      <paper-dialog 
+        show="open" 
+        with-backdrop 
+        action="iron-overlay-closed:reset"
+      >
+        <h2>.top</h2>
+        <paper-dialog-scrollable>
+          Lorem ipsum...
+        </paper-dialog-scrollable>
+        <div class="buttons">
+          <paper-button dialog-dismiss>que bom</paper-button>
+        </div>
+      </paper-dialog>
+    </div>
+    <!-- when success -->
+
+  </carbo-form>
+</body>
+
+</html>

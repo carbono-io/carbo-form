@@ -1,0 +1,106 @@
+<html>
+    <head>
+        <script src="../webcomponentsjs/webcomponents-lite.js"></script>
+        <script>
+          window.Polymer = window.Polymer || {};
+          window.Polymer.dom = 'shadow';
+        </script>
+
+        <link rel="import" href="../polymer/polymer.html">
+        <link rel="import" href="../iron-icons/iron-icons.html">
+        <link rel="import" href="../paper-icon-button/paper-icon-button.html">
+        <link rel="import" href="../paper-toolbar/paper-toolbar.html">
+        
+        <link rel="import" href="../carbo-form.html">
+
+
+        <link rel="import" href="../paper-input/paper-input.html">
+        <link rel="import" href="../paper-input/paper-input-container.html">
+        <link rel="import" href="../paper-button/paper-button.html">
+        <link rel="import" href="../paper-toast/paper-toast.html">
+        <link rel="import" href="../paper-dialog/paper-dialog.html">
+        <link rel="import" href="../iron-input/iron-input.html">
+        <link rel="import" href="../iron-form/iron-form.html">
+        <link rel="import" href="../paper-spinner/paper-spinner.html">
+
+        <!-- styles -->
+        <link rel="stylesheet" type="text/css" href="base-polymer-project.css">
+    </head>
+    <body class="fullbleed layout vertical">
+        <paper-toolbar>
+            <paper-icon-button icon="menu" on-tap="menuAction"></paper-icon-button>
+            <div class="title">Title</div>
+            <paper-icon-button icon="more-vert" on-tap="moreAction"></paper-icon-button>
+        </paper-toolbar>
+        
+          <carbo-form id="test">
+        
+            <!-- the form -->
+            <form is="iron-form" action="/demo/data.json" method="get">
+                <paper-input 
+                name="test0" 
+                label="Campo 1"
+                required
+                error-message="Por favor, preencha esse campo"
+                ></paper-input>
+
+                <paper-input 
+                name="test0" 
+                label="Campo 2"
+                required
+                error-message="Campo obrigatório"
+                ></paper-input>
+              
+            </form>
+            <!-- the form -->
+        
+            <!-- form controls -->
+            <div form-control>
+                <div class="form-commands">
+                    <paper-button 
+                    raised 
+                    action="reset"
+                    >Cancelar</paper-button>
+                    <paper-button 
+                    class="purple"
+                    raised 
+                    action="submit"
+                    >Enviar</paper-button>
+                </div>
+            </div>
+            <!-- form controls -->
+        
+            <!-- when invalid -->
+            <div state="invalid">
+                <paper-toast text="Por favor, corrija os campos inválidos" show="show">
+                    <!-- <span raised action="click:submit">Reenviar</span> -->
+                </paper-toast>
+            </div>
+            <!-- when invalid -->
+        
+            <!-- when loading -->
+            <div state="loading">
+                <div id="formloading">
+                    <paper-spinner alt="Loading form" active></paper-spinner>
+                    <p>Carregando</p>
+                </div>
+            </div>
+        
+            <!-- when error -->
+            <div state="error">
+                <paper-toast text="Erro de envio" show="show">
+                    <span raised action="click:submit">Tentar novamente</span>
+                </paper-toast>
+            </div>
+            <!-- when error -->
+        
+            <!-- when success -->
+            <div state="success">
+                <paper-toast text="Formulário enviado com sucesso!" show="show">
+                </paper-toast>
+            </div>
+            <!-- when success -->
+        
+          </carbo-form>
+    </body>
+</html>

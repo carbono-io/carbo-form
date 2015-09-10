@@ -1,0 +1,289 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<dom-module id="carbo-form">
+
+    <style type="text/css">
+
+    #invalid,
+    #error,
+    #success,
+    #loading {
+        visibility: hidden;
+    }
+
+    #wrapper[state="invalid"] #invalid, 
+    #wrapper[state="error"] #error, 
+    #wrapper[state="loading"] #loading, 
+    #wrapper[state="success"] #success {
+        visibility: visible;
+    }
+
+    #form {
+        padding-left: 0.29em;
+        padding-right: 0.29em;
+    }
+
+    </style>
+
+    <template>
+
+        <div id="wrapper">
+
+            <div id="form">
+                <content id="content-form" select="form"></content>
+            </div>
+
+            <div id="form-control">
+                <content select="[form-control]"></content>
+            </div>
+
+            <!-- 
+                Use single quotes here for the `select` attribute 
+                so that we may use the double quotes for the css selector.
+
+                It seems to be ok to use single quotes for attribute definition.
+                http://stackoverflow.com/questions/2373074/single-vs-double-quotes-vs 
+            -->
+            <div id="invalid">
+                <content id="content-invalid" select='[state="invalid"]'></content>
+            </div>
+            <div id="loading">
+                <content id="content-loading" select='[state="loading"]'></content>
+            </div>
+
+            <div id="error">
+                <content id="content-error" select='[state="error"]'></content>
+            </div>
+            
+            <div id="success">
+                <content id="content-success" select='[state="success"]'></content>
+            </div>
+
+        </div>
+        
+    </template>
+
+    <script type="text/javascript">
+
+    /**
+     * Mapping of iron-form events to their
+     * respective event handlers
+     * @type {Object}
+     */
+    var IRON_FORM_EVENT_HANDLERS = {
+        'iron-form-invalid': '_handleIronFormInvalid',
+        'iron-form-submit': '_handleIronFormSubmit',
+        'iron-form-error': '_handleIronFormError',
+        'iron-form-response': '_handleIronFormResponse',
+    };
+
+    /**
+     * Helper function to transform arguments object into array
+     * @param  {Arguments} listObject The listObject object within any js function
+     * @return {Array}               Array equivalent to the listObject object
+     */
+    function toArray(listObject) {
+        return Array.prototype.slice.call(listObject, 0);
+    }
+
+    /**
+     * Regular expression for matching action events and their 
+     * correspondant actions.
+     *
+     * 'event:action'.match(actionRegExp)
+     * returns ['event:action', 'event', 'action']
+     * 
+     * 'action'.match(actionRegExp)
+     * returns ['action', undefined, 'action']
+     *
+     * ':action'.match(actionRegExp)
+     * returns ['event:action', undefined, 'action']
+     * 
+     * @type {RegExp}
+     */
+    var actionRegExp = /(?:(.+):)?(.+)/;
+
+
+    Polymer({
+        is: 'carbo-form',
+
+        /**
+         * Called whenever the component is ready and the 
+         * dom nodes are available for inspection.
+         */
+        ready: function () {
+
+            var invalid = Polymer.dom(this.$['content-invalid']).getDistributedNodes()[0].children;
+            var error = Polymer.dom(this.$['content-error']).getDistributedNodes()[0].children;
+            var success = Polymer.dom(this.$['content-success']).getDistributedNodes()[0].children;
+
+            // Property to hold content nodes
+            this._contents = {
+                form: Polymer.dom(this.$['content-form']).getDistributedNodes()[0],
+                invalid: toArray(invalid),
+                error: toArray(error),
+                success: toArray(success),
+            };
+
+            console.log(this._contents.success)
+
+            this._listenActionableElements();
+
+            this._listenFormEvents();
+        },
+
+        /**
+         * Set up event listeners onto all elements 
+         * that have 'action' attribute set onto them.
+         *
+         * Pipe those event listeners to the corresponding
+         * methods on the carbo-form element.
+         *
+         * Some of the methods are simple proxies to the `iron-form`
+         * itself.
+         */
+        _listenActionableElements: function () {
+
+            // Select all nodes that are potential actionable nodes
+            var actionable = Polymer.dom(this).querySelectorAll('[action]');
+
+            actionable.forEach(function (el) {
+
+            var actionStr = el.getAttribute('action');
+
+            if (!actionStr) {
+                console.warn('No action string for ');
+                console.log(el);
+                // If no action string is defined, simply ignore the element
+                return;
+            }
+
+            var actionMatch = actionStr.match(actionRegExp);
+            var eventName   = actionMatch[1] || 'click';
+            var methodName  = actionMatch[2];
+
+            el.addEventListener(eventName, this._executeMethod.bind(this, methodName));
+
+            }.bind(this));
+        },
+
+        /**
+         * Sets up listeners for the iron-form event
+         */
+        _listenFormEvents: function () {
+            var form = this._contents.form;
+
+            for (var evt in IRON_FORM_EVENT_HANDLERS) {
+                form.addEventListener(
+                    evt, 
+                    this[IRON_FORM_EVENT_HANDLERS[evt]].bind(this)
+                );
+            }
+        },
+
+        _handleIronFormInvalid: function (event) {
+
+            // Set state to invalid and flush dom modifications
+            Polymer.dom(this).setAttribute('state', 'invalid');
+            Polymer.dom(this.$.wrapper).setAttribute('state', 'invalid');
+
+            // Attempt to show
+            var invalidElements = this._contents.invalid;
+
+            invalidElements.forEach(function (el) {
+                var showMethod = el.getAttribute('show');
+                if (showMethod) {
+                    el[showMethod](event);
+                }
+            }.bind(this));
+        },
+
+        _handleIronFormSubmit: function (event) {
+            console.log('form loading')
+            console.log(event)
+            Polymer.dom(this).setAttribute('state', 'loading');
+            Polymer.dom(this.$.wrapper).setAttribute('state', 'loading');
+        },
+
+        _handleIronFormResponse: function (event) {
+            console.log('form response')
+            console.log(event)
+            Polymer.dom(this).setAttribute('state', 'success');
+            Polymer.dom(this.$.wrapper).setAttribute('state', 'success');
+
+            this._contents.success.forEach(function (el) {
+                var showMethod = el.getAttribute('show');
+                if (showMethod) {
+                    el[showMethod](event);
+                }
+            }.bind(this));
+        },
+
+        _handleIronFormError: function (event) {
+            Polymer.dom(this).setAttribute('state', 'error');
+            Polymer.dom(this.$.wrapper).setAttribute('state', 'error');
+
+            this._contents.error.forEach(function (el) {
+                var showMethod = el.getAttribute('show');
+                if (showMethod) {
+                    el[showMethod](event);
+                }
+            }.bind(this));
+        },
+
+        /**
+         * Executes a given method.
+         *
+         * TODO: implement receiving arguments.
+         * 
+         * @param  {String} methodName The name of the action to be executed
+         * @param  {Event} event      Event
+         * @return {*}            Returns whatever the original method returns.
+         */
+        _executeMethod: function (methodName, event) {
+
+            var operation = this[methodName];
+
+            if (!operation) {
+                console.warn('No ' + methodName + ' is defined.');
+                return;
+            }
+
+            return operation.call(this, event);
+        },
+
+        /**
+         * Proxy to the iron-form element
+         */
+        submit: function () {
+            var form = this._contents.form;
+
+            // submit
+            return form.submit.apply(form, toArray(arguments));
+        },
+
+        /**
+         * Proxy to the iron-form element
+         */
+        validate: function () {
+            var form = this._contents.form;
+
+            return form.validate.apply(form, toArray(arguments));
+        },
+
+        /**
+         * Resets the state of the form
+         *
+         * TODO: reset values from inputs
+         */
+        reset: function () {
+
+            Polymer.dom(this).setAttribute('state', '');
+            Polymer.dom(this.$.wrapper).setAttribute('state', '');
+        }
+
+    });
+
+    </script>
+
+</dom-module>
