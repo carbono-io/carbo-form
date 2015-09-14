@@ -10,11 +10,15 @@ body {
  * vvvvvvvv
  */
 
-.form-commands {
+form {
+    padding: 16px 16px;
+}
+
+carbo-form-control {
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
-    padding: 16px 0;
+    padding: 16px 16px;
 }
 
 paper-button {
@@ -28,10 +32,6 @@ paper-button:first-child {
 paper-button.purple {
     background-color: #636;
     color: #fff;
-}
-
-#test {
-    padding: 16px;
 }
 
 carbo-form[state="invalid"] #invalid-message,
